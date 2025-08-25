@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amway 4 Basics Tracker - Simple Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .title { 
+            font-size: 3rem; 
+            font-weight: bold; 
+            background: linear-gradient(135deg, #1e40af, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .subtitle { font-size: 1.2rem; color: #666; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .card-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin-right: 15px;
+        }
+        .card-title { font-size: 1.2rem; font-weight: bold; }
+        .card-description { color: #666; margin-bottom: 15px; }
+        .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+        .stat-badge { 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 0.75rem; 
+            font-weight: 500;
+        }
+        .stat-todo { background: #fef2f2; color: #dc2626; }
+        .stat-progress { background: #fef3c7; color: #d97706; }
+        .stat-done { background: #f0fdf4; color: #16a34a; }
+        .btn { 
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .message { 
+            background: #dbeafe; 
+            border: 1px solid #3b82f6; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 20px 0;
+            text-align: center;
+        }
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">💎 Amway 4 Basics Tracker</h1>
+            <p class="subtitle">Master the fundamentals of Amway success</p>
+            
+            <div class="message">
+                <strong>Simple Browser Version</strong><br/>
+                This is a simplified version that runs directly in your browser.<br/>
+                For the full experience, please use the development server version.
+            </div>
+        </div>
+
+        <div id="app-content">
+            <div class="loading">Loading your 4 Basics data...</div>
+        </div>
+    </div>
+
+    <script>
+        // Simple vanilla JavaScript version - no external dependencies
+        function loadData() {
+            try {
+                const data = {
+                    contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
+                    calls: JSON.parse(localStorage.getItem('calls') || '[]'),
+                    stps: JSON.parse(localStorage.getItem('stps') || '[]'),
+                    fufts: JSON.parse(localStorage.getItem('fufts') || '[]')
+                };
+                return data;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                return {
+                    contacts: [],
+                    calls: [],
+                    stps: [],
+                    fufts: []
+                };
+            }
+        }
+
+        function calculateStats(items) {
+            return {
+                total: items.length,
+                todo: items.filter(item => item.status === 'todo').length,
+                progress: items.filter(item => item.status === 'progress').length,
+                done: items.filter(item => item.status === 'done').length
+            };
+        }
+
+        function renderApp() {
+            const data = loadData();
+            const totalActivities = data.contacts.length + data.calls.length + data.stps.length + data.fufts.length;
+            
+            const modules = [
+                {
+                    title: 'Contact List',
+                    description: 'Manage your prospect contacts',
+                    stats: calculateStats(data.contacts),
+                    color: 'background: linear-gradient(135deg, #dbeafe, #bfdbfe);',
+                    icon: '👥'
+                },
+                {
+                    title: 'Call & Invite',
+                    description: 'Track calls and invitations',
+                    stats: calculateStats(data.calls),
+                    color: 'background: linear-gradient(135deg, #dcfce7, #bbf7d0);',
+                    icon: '📞'
+                },
+                {
+                    title: 'STP (Show The Plan)',
+                    description: 'Track plan presentations',
+                    stats: calculateStats(data.stps),
+                    color: 'background: linear-gradient(135deg, #f3e8ff, #e9d5ff);',
+                    icon: '🎯'
+                },
+                {
+                    title: 'FUFT (Follow Up Follow Through)',
+                    description: 'Follow up and follow through',
+                    stats: calculateStats(data.fufts),
+                    color: 'background: linear-gradient(135deg, #fed7aa, #fdba74);',
+                    icon: '🔄'
+                }
+            ];
+
+            let html = '<div class="grid">';
+            
+            modules.forEach(module => {
+                html += `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="${module.color}">
+                                <span style="font-size: 24px">${module.icon}</span>
+                            </div>
+                            <div>
+                                <h3 class="card-title">${module.title}</h3>
+                            </div>
+                        </div>
+                        <p class="card-description">${module.description}</p>
+                        <div class="stats">
+                            <span class="stat-badge">Total: ${module.stats.total}</span>
+                            <span class="stat-badge stat-todo">To Do: ${module.stats.todo}</span>
+                            <span class="stat-badge stat-progress">In Progress: ${module.stats.progress}</span>
+                            <span class="stat-badge stat-done">Done: ${module.stats.done}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            html += `
+                <div style="text-align: center; margin-top: 40px;">
+                    <p style="margin-bottom: 20px; font-size: 1.1rem;">
+                        <strong>Total Activities: ${totalActivities}</strong>
+                    </p>
+                    <button 
+                        class="btn"
+                        onclick="showFullVersionInfo()"
+                    >
+                        Get Started with Full Version
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('app-content').innerHTML = html;
+        }
+
+        function showFullVersionInfo() {
+            alert('To add and manage your 4 Basics data, please use the full Next.js application.\n\nTo start the full version:\n1. Run the PowerShell script: start.ps1\n2. Or use the batch file: start.bat\n3. Or run manually: npm run dev');
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                renderApp();
+            } catch (error) {
+                console.error('Error rendering app:', error);
+                document.getElementById('app-content').innerHTML = `
+                    <div class="error-message">
+                        <strong>Error loading application</strong><br/>
+                        Please check the browser console for details.<br/>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

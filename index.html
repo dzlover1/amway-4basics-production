@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amway 4 Basics Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .title { 
+            font-size: 3rem; 
+            font-weight: bold; 
+            background: linear-gradient(135deg, #1e40af, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .subtitle { font-size: 1.2rem; color: #666; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .card-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin-right: 15px;
+        }
+        .card-title { font-size: 1.2rem; font-weight: bold; }
+        .card-description { color: #666; margin-bottom: 15px; }
+        .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+        .stat-badge { 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 0.75rem; 
+            font-weight: 500;
+        }
+        .stat-todo { background: #fef2f2; color: #dc2626; }
+        .stat-progress { background: #fef3c7; color: #d97706; }
+        .stat-done { background: #f0fdf4; color: #16a34a; }
+        .btn { 
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .message { 
+            background: #dbeafe; 
+            border: 1px solid #3b82f6; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 20px 0;
+            text-align: center;
+        }
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #1e40af, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .login-form {
+            text-align: left;
+        }
+        .login-error {
+            background: #fef2f2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .login-success {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            color: #16a34a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+        .forgot-password a {
+            color: #1e40af;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        .register-link {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+        }
+        .register-link a {
+            color: #1e40af;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .user-info {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">💎 Amway</h1>
+            <p class="login-subtitle">4 Basics Tracker Login</p>
+            
+            <div id="loginError" class="login-error hidden"></div>
+            <div id="loginSuccess" class="login-success hidden"></div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username *</label>
+                    <input type="text" id="username" class="form-input" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password *</label>
+                    <div class="password-container">
+                        <input type="password" id="password" class="form-input" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="forgot-password">
+                    <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+                </div>
+            </form>
+            
+            <div class="register-link">
+                Don't have an account? <a href="#" onclick="showRegister()">Register here</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h3>Create Account</h3>
+            <div id="registerError" class="login-error hidden"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label class="form-label" for="regUsername">Username *</label>
+                    <input type="text" id="regUsername" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regEmail">Email *</label>
+                    <input type="email" id="regEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regPassword">Password *</label>
+                    <input type="password" id="regPassword" class="form-input" required minlength="6">
+                    <small style="color: #666; font-size: 12px;">Must contain uppercase, lowercase, and number</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regConfirmPassword">Confirm Password *</label>
+                    <input type="password" id="regConfirmPassword" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regFullName">Full Name</label>
+                    <input type="text" id="regFullName" class="form-input">
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeRegisterModal()" style="background: #6b7280;">Cancel</button>
+                    <button type="submit" class="btn">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1 class="title">💎 Amway 4 Basics Tracker</h1>
+                <p class="subtitle">Master the fundamentals of Amway success</p>
+                
+                <div id="userInfo" class="user-info">
+                    <span>Welcome back, <strong id="currentUser"></strong>!</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+                
+                <div class="message">
+                    <strong>Web Version</strong><br/>
+                    Track your progress in the 4 fundamental areas of Amway success.<br/>
+                    Data is stored locally in your browser.
+                </div>
+            </div>
+
+            <div id="app-content">
+                <div class="loading">Loading your 4 Basics data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Data Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add New Item</h3>
+            <form id="addForm">
+                <div class="form-group">
+                    <label class="form-label" for="itemName">Name/Title *</label>
+                    <input type="text" id="itemName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="itemDescription">Description</label>
+                    <textarea id="itemDescription" class="form-textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="itemStatus">Status</label>
+                    <select id="itemStatus" class="form-select">
+                        <option value="todo">To Do</option>
+                        <option value="progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="form-group" id="contactFields" style="display: none;">
+                    <label class="form-label" for="itemPhone">Phone</label>
+                    <input type="tel" id="itemPhone" class="form-input">
+                    <label class="form-label" for="itemEmail">Email</label>
+                    <input type="email" id="itemEmail" class="form-input">
+                </div>
+                <div class="form-group" id="dateFields" style="display: none;">
+                    <label class="form-label" for="itemDate">Date</label>
+                    <input type="date" id="itemDate" class="form-input">
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background: #6b7280;">Cancel</button>
+                    <button type="submit" class="btn">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentModule = '';
+        let currentUser = null;
+        
+        // Authentication functions
+        function initializeAuth() {
+            try {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    showMainApp();
+                } else {
+                    showLoginPage();
+                }
+            } catch (error) {
+                console.error('Error initializing auth:', error);
+                showLoginPage();
+            }
+        }
+        
+        function showLoginPage() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+        
+        function showMainApp() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = currentUser.username;
+            renderApp();
+        }
+        
+        function login(username, password) {
+            try {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    currentUser = { username: user.username, email: user.email, fullName: user.fullName };
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showLoginSuccess('Login successful!');
+                    setTimeout(() => {
+                        showMainApp();
+                    }, 1000);
+                    return true;
+                } else {
+                    showLoginError('Invalid username or password.');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                showLoginError('An error occurred during login. Please try again.');
+                return false;
+            }
+        }
+        
+        function register(username, email, password, fullName) {
+            try {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // Check if username already exists
+                if (users.find(u => u.username === username)) {
+                    showRegisterError('Username already exists.');
+                    return false;
+                }
+                
+                // Check if email already exists
+                if (users.find(u => u.email === email)) {
+                    showRegisterError('Email already exists.');
+                    return false;
+                }
+                
+                // Password strength validation
+                if (password.length < 6) {
+                    showRegisterError('Password must be at least 6 characters long.');
+                    return false;
+                }
+                
+                if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                    showRegisterError('Password must contain at least one uppercase letter, one lowercase letter, and one number.');
+                    return false;
+                }
+                
+                const newUser = {
+                    id: Date.now().toString(),
+                    username,
+                    email,
+                    password,
+                    fullName,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null,
+                    loginAttempts: 0
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                closeRegisterModal();
+                showLoginSuccess('Account created successfully! Please login with strong password.');
+                return true;
+            } catch (error) {
+                console.error('Error during registration:', error);
+                showRegisterError('An error occurred during registration. Please try again.');
+                return false;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                showLoginPage();
+                clearLoginMessages();
+            }
+        }
+        
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+        
+        function showRegister() {
+            document.getElementById('registerModal').style.display = 'block';
+            clearRegisterMessages();
+        }
+        
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('registerForm').reset();
+            clearRegisterMessages();
+        }
+        
+        function showForgotPassword() {
+            const email = prompt('Enter your email address to receive password reset instructions:');
+            
+            if (!email) {
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showLoginError('Please enter a valid email address.');
+                return;
+            }
+            
+            // Show loading state
+            showLoginSuccess('Processing reset request...');
+            
+            // Check if running locally or on production
+            const isLocal = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.protocol === 'file:' ||
+                          window.location.port === '8080';
+            
+            if (isLocal) {
+                // For local development: Simulate email send
+                simulatePasswordReset(email);
+            } else {
+                // For production: Send request to backend
+                sendPasswordResetEmail(email);
+            }
+        }
+        
+        async function sendPasswordResetEmail(email) {
+            try {
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                
+                const response = await fetch('/.netlify/functions/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showLoginSuccess(`✅ Password reset email sent to ${email}!\n\nPlease check:\n• Your inbox\n• Spam/Junk folder\n• The email may take a few minutes to arrive`);
+                } else {
+                    showLoginError(result.error || 'Failed to send reset email. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error sending reset email:', error);
+                
+                if (error.name === 'AbortError') {
+                    showLoginError('Request timed out. Please check your internet connection and try again.');
+                } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    // This usually means we're on GitHub Pages or similar static hosting
+                    showLoginError('⚠️ Email service not available on this hosting platform.\n\nFor production email functionality:\n1. Deploy to Netlify\n2. Configure email settings\n3. Try again on the Netlify URL');
+                } else {
+                    showLoginError('Network error. Please check your connection and try again.');
+                }
+            }
+        }
+        
+        function simulatePasswordReset(email) {
+            // For local development
+            setTimeout(() => {
+                showLoginSuccess(`🔧 [LOCAL DEVELOPMENT MODE]\n\n✅ Email would be sent to: ${email}\n\n📧 In production, the user will receive:\n• Professional Amway-branded email\n• Secure reset link (expires in 1 hour)\n• Reset code as backup\n• Step-by-step instructions\n\n🚀 To enable real emails:\n1. Deploy to Netlify\n2. Configure EMAIL_USER and EMAIL_PASS\n3. Test on live site`);
+            }, 1500);
+        }
+        
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('loginSuccess').classList.add('hidden');
+        }
+        
+        function showLoginSuccess(message) {
+            const successDiv = document.getElementById('loginSuccess');
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+        
+        function showRegisterError(message) {
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+        
+        function clearLoginMessages() {
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('loginSuccess').classList.add('hidden');
+        }
+        
+        function clearRegisterMessages() {
+            document.getElementById('registerError').classList.add('hidden');
+        }
+
+        // Data management functions
+        function loadData() {
+            try {
+                const data = {
+                    contacts: JSON.parse(localStorage.getItem('contacts') || '[]'),
+                    calls: JSON.parse(localStorage.getItem('calls') || '[]'),
+                    stps: JSON.parse(localStorage.getItem('stps') || '[]'),
+                    fufts: JSON.parse(localStorage.getItem('fufts') || '[]')
+                };
+                return data;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                return {
+                    contacts: [],
+                    calls: [],
+                    stps: [],
+                    fufts: []
+                };
+            }
+        }
+
+        function saveData(module, items) {
+            try {
+                localStorage.setItem(module, JSON.stringify(items));
+                renderApp();
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Error saving data. Please try again.');
+            }
+        }
+
+        function calculateStats(items) {
+            return {
+                total: items.length,
+                todo: items.filter(item => item.status === 'todo').length,
+                progress: items.filter(item => item.status === 'progress').length,
+                done: items.filter(item => item.status === 'done').length
+            };
+        }
+
+        function openAddModal(module) {
+            currentModule = module;
+            const modal = document.getElementById('addModal');
+            const title = document.getElementById('modalTitle');
+            const contactFields = document.getElementById('contactFields');
+            const dateFields = document.getElementById('dateFields');
+            
+            // Reset form
+            document.getElementById('addForm').reset();
+            
+            // Set title and show relevant fields
+            switch(module) {
+                case 'contacts':
+                    title.textContent = 'Add New Contact';
+                    contactFields.style.display = 'block';
+                    dateFields.style.display = 'none';
+                    break;
+                case 'calls':
+                    title.textContent = 'Add New Call/Invite';
+                    contactFields.style.display = 'none';
+                    dateFields.style.display = 'block';
+                    break;
+                case 'stps':
+                    title.textContent = 'Add New STP (Show The Plan)';
+                    contactFields.style.display = 'none';
+                    dateFields.style.display = 'block';
+                    break;
+                case 'fufts':
+                    title.textContent = 'Add New FUFT (Follow Up Follow Through)';
+                    contactFields.style.display = 'none';
+                    dateFields.style.display = 'block';
+                    break;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        function addItem(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('itemName').value.trim();
+            const description = document.getElementById('itemDescription').value.trim();
+            const status = document.getElementById('itemStatus').value;
+            
+            if (!name) {
+                alert('Name/Title is required');
+                return;
+            }
+            
+            const newItem = {
+                id: Date.now().toString(),
+                name: name,
+                description: description,
+                status: status,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Add module-specific fields
+            if (currentModule === 'contacts') {
+                newItem.phone = document.getElementById('itemPhone').value.trim();
+                newItem.email = document.getElementById('itemEmail').value.trim();
+            } else {
+                newItem.date = document.getElementById('itemDate').value;
+            }
+            
+            const data = loadData();
+            data[currentModule].push(newItem);
+            saveData(currentModule, data[currentModule]);
+            
+            closeModal();
+        }
+
+        function renderApp() {
+            const data = loadData();
+            const totalActivities = data.contacts.length + data.calls.length + data.stps.length + data.fufts.length;
+            
+            const modules = [
+                {
+                    key: 'contacts',
+                    title: 'Contact List',
+                    description: 'Manage your prospect contacts',
+                    stats: calculateStats(data.contacts),
+                    color: 'background: linear-gradient(135deg, #dbeafe, #bfdbfe);',
+                    icon: '👥'
+                },
+                {
+                    key: 'calls',
+                    title: 'Call & Invite',
+                    description: 'Track calls and invitations',
+                    stats: calculateStats(data.calls),
+                    color: 'background: linear-gradient(135deg, #dcfce7, #bbf7d0);',
+                    icon: '📞'
+                },
+                {
+                    key: 'stps',
+                    title: 'STP (Show The Plan)',
+                    description: 'Track plan presentations',
+                    stats: calculateStats(data.stps),
+                    color: 'background: linear-gradient(135deg, #f3e8ff, #e9d5ff);',
+                    icon: '🎯'
+                },
+                {
+                    key: 'fufts',
+                    title: 'FUFT (Follow Up Follow Through)',
+                    description: 'Follow up and follow through',
+                    stats: calculateStats(data.fufts),
+                    color: 'background: linear-gradient(135deg, #fed7aa, #fdba74);',
+                    icon: '🔄'
+                }
+            ];
+
+            let html = '<div class="grid">';
+            
+            modules.forEach(module => {
+                html += `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="${module.color}">
+                                <span style="font-size: 24px">${module.icon}</span>
+                            </div>
+                            <div>
+                                <h3 class="card-title">${module.title}</h3>
+                            </div>
+                        </div>
+                        <p class="card-description">${module.description}</p>
+                        <div class="stats">
+                            <span class="stat-badge">Total: ${module.stats.total}</span>
+                            <span class="stat-badge stat-todo">To Do: ${module.stats.todo}</span>
+                            <span class="stat-badge stat-progress">In Progress: ${module.stats.progress}</span>
+                            <span class="stat-badge stat-done">Done: ${module.stats.done}</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn" onclick="openAddModal('${module.key}')">Add New</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            html += `
+                <div style="text-align: center; margin-top: 40px;">
+                    <p style="margin-bottom: 20px; font-size: 1.1rem;">
+                        <strong>Total Activities: ${totalActivities}</strong>
+                    </p>
+                    <button class="btn" onclick="exportData()">Export Data</button>
+                    <button class="btn" onclick="importData()">Import Data</button>
+                    <button class="btn" onclick="clearAllData()" style="background: #dc2626;">Clear All Data</button>
+                </div>
+            `;
+            
+            document.getElementById('app-content').innerHTML = html;
+        }
+
+        function exportData() {
+            const data = loadData();
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'amway-4basics-data.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.contacts && data.calls && data.stps && data.fufts) {
+                                localStorage.setItem('contacts', JSON.stringify(data.contacts));
+                                localStorage.setItem('calls', JSON.stringify(data.calls));
+                                localStorage.setItem('stps', JSON.stringify(data.stps));
+                                localStorage.setItem('fufts', JSON.stringify(data.fufts));
+                                renderApp();
+                                alert('Data imported successfully!');
+                            } else {
+                                alert('Invalid data format');
+                            }
+                        } catch (error) {
+                            alert('Error importing data: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.removeItem('contacts');
+                localStorage.removeItem('calls');
+                localStorage.removeItem('stps');
+                localStorage.removeItem('fufts');
+                renderApp();
+                alert('All data cleared successfully!');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initializeAuth();
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                showLoginPage();
+            }
+        });
+        
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showLoginError('Please enter both username and password.');
+                return;
+            }
+            
+            login(username, password);
+        });
+        
+        // Register form handler
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const fullName = document.getElementById('regFullName').value.trim();
+            
+            // Validation
+            if (!username || !email || !password) {
+                showRegisterError('Please fill in all required fields.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showRegisterError('Password must be at least 6 characters long.');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showRegisterError('Passwords do not match.');
+                return;
+            }
+            
+            register(username, email, password, fullName);
+        });
+
+        document.getElementById('addForm').addEventListener('submit', addItem);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addModal');
+            const registerModal = document.getElementById('registerModal');
+            
+            if (event.target === addModal) {
+                closeModal();
+            }
+            
+            if (event.target === registerModal) {
+                closeRegisterModal();
+            }
+        }
+    </script>
+</body>
+</html>
